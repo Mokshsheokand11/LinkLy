@@ -2,21 +2,25 @@ import express from 'express';
 import dotenv from 'dotenv';
 import http from 'http';
 import { Server } from 'socket.io';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+
+import { connectDB } from './utils/db.js';
+import authRoutes from './routes/auth.route.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.get('/api/auth/signup', (req, res) => {
-    res.send('Signup Route');
-});
-app.get('/api/auth/Login', (req, res) => {
-    res.send('Login Route');
-});
-app.get('/api/auth/Logout', (req, res) => {
-    res.send('Logout Route');
-});
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+    origin: 'http://localhost:5173', // Adjust based on your frontend port
+    credentials: true,
+}));
+
+app.use('/api/auth', authRoutes);
 
 // Simple WebSocket (Socket.IO) signaling server for WebRTC
 const server = http.createServer(app);
@@ -56,4 +60,5 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    connectDB();
 });
